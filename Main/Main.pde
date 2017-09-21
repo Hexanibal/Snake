@@ -5,15 +5,15 @@ void setup() {
   s = new Snake(31, 31);
   v = new PVector();
   
-  size(800, 800);
+  size(775, 775);
   frameRate(10);
 }
 
 void draw() {
   background(40);
   s.death();
-  s.eat();
   s.move();
+  s.eat();
   s.display();
 }
 

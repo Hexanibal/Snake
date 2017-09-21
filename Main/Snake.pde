@@ -9,10 +9,10 @@ class Snake {
   PVector food;
   
   public Snake(int columns, int rows) {
-      this.columns = columns;
-      this.rows = rows;
       this.tx = width / columns;
       this.ty = height / rows;
+      this.columns = columns - 1;
+      this.rows = rows - 1;
       this.matrice = new PVector[columns][rows];
       
       this.corps = new ArrayList();
@@ -21,12 +21,12 @@ class Snake {
       this.food = new PVector();
       
       for(int i = 0; i < columns; i++) {
-         for(int j = 0; j < rows; j++) {
+        for(int j = 0; j < rows; j++) {
              matrice[i][j] = new PVector(i, j);
          }
       }
       
-      addCorps(matrice[(columns % 2 == 0) ? columns / 2 : (columns - 1) / 2][(rows % 2 == 0) ? rows / 2 : (rows - 1) / 2]);
+      firstCorp(matrice[(columns % 2 == 0) ? columns / 2 : columns / 2 - 1][(rows % 2 == 0) ? rows / 2 : rows / 2 - 1]);
       sumonFood();
   }
   
@@ -35,7 +35,6 @@ class Snake {
       if(direction.x == 0 && direction.y == 0) return;   //<>//
       
       PVector v = new PVector(direction.x + map.get(0).x, direction.y + map.get(0).y); //<>//
-      
       HashMap<Integer, PVector> p = new HashMap();
       
       p.put(0, matrice[(int) v.x][(int) v.y]);
@@ -43,14 +42,23 @@ class Snake {
       corps.remove(map.get(map.size() - 1));
       
       for (int i = 0; i < map.size() - 1; i++) {
-          p.put(i+1, map.get(i));
+         p.put(i+1, map.get(i));
       }
       
-      map = p; //<>// //<>// //<>//
+      map = p;
+  }
+
+  public void death() {
+      PVector v = new PVector(map.get(0).x + direction.x, map.get(0).y + direction.y);  
+      if(corps.contains(v) || v.x > columns || v.x < 0 || v.y > rows ||v.y < 0) {
+          map = new HashMap();
+          corps = new ArrayList();
+          firstCorp(matrice[(columns % 2 == 0) ? columns / 2 : columns / 2 - 1][(rows % 2 == 0) ? rows / 2 : rows / 2 - 1]);
+          setDirection(0, 0);
+      }
   }
   
   public void display() {
-      
       noStroke();
       fill(188, 107, 229);
       rect(getPixX(food), getPixY(food), tx, ty);
@@ -63,54 +71,23 @@ class Snake {
       
   }
   
-  public void addCorps() {
-    HashMap<Integer, PVector> p = new HashMap(); 
-    PVector v = new PVector(direction.x + map.get(0).x, direction.y + map.get(0).y);
+   public void addCorps() {
+    PVector v = food;
     
     this.corps.add(matrice[(int) v.x][(int) v.y]);
-     
-     if(map.size() == 0) {  
-         map.put(0, matrice[(int) v.x][(int) v.y]);
-     } else {
-       
-       p.put(0, matrice[(int) v.x][(int) v.y]);
-       
-       for (int i = 0; i < map.size(); i++) {
-            p.put(i+1, map.get(i));
-       }
-       map = p;
-     }
-    
+    map.put(corps.size() - 1, matrice[(int) v.x][(int) v.y]);
   }
   
-  public void addCorps(PVector v) {
-    HashMap<Integer, PVector> p = new HashMap(); 
-    
+  public void firstCorp(PVector v) {
     this.corps.add(matrice[(int) v.x][(int) v.y]);
-     
-     if(map.size() == 0) {  
-         map.put(0, matrice[(int) v.x][(int) v.y]);
-     } else {
-       
-       p.put(0, matrice[(int) v.x][(int) v.y]);
-       
-       for (int i = 0; i < map.size(); i++) {
-            p.put(i+1, map.get(i));
-       }
-       map = p;
-     }
-    
+    map.put(0, matrice[(int) v.x][(int) v.y]);
   }
   
-  public void eat() {
-      PVector v = new PVector(direction.x + map.get(0).x, direction.y + map.get(0).y);
-      
-      if(v.x == food.x && v.y == food.y) {
+  public void eat() { 
+      if(map.get(0).x == food.x && map.get(0).y == food.y) {
          addCorps();
-         
          sumonFood();
       }
-      
   }
   
   public void sumonFood() {
@@ -118,22 +95,12 @@ class Snake {
       int y;
       
       do {
-        x = (int) random(2, columns - 2);
-        y = (int) random(2, rows - 2);
+        x = (int) random(0, columns);
+        y = (int) random(0, rows);
       } while (corps.contains(matrice[x][y]));
       
       food.set(x, y);
 }
-  
-  public void death() {
-      PVector v = new PVector(direction.x + map.get(0).x, direction.y + map.get(0).y);  
-      if(corps.contains(v) || v.x >= columns || v.x < 0 || v.y >= rows ||v.y < 0) {
-          map = new HashMap();
-          corps = new ArrayList();
-          addCorps(matrice[(columns % 2 == 0) ? columns / 2 : (columns - 1) / 2][(rows % 2 == 0) ? rows / 2 : (rows - 1) / 2]);
-          setDirection(0, 0);
-      }
-  }
   
   public void setDirection(int x, int y) {
       direction.set(x, y);
